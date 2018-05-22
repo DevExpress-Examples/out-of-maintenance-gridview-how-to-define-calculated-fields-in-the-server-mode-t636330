@@ -1,0 +1,57 @@
+@using CalculatedFieldsInServerMode.Models
+
+@{
+    var grid = Html.DevExpress().GridView(settings => {
+        settings.Name = "GridView";
+        settings.CallbackRouteValues = new { Controller = "Home", Action = "GridViewPartial" };
+
+
+        settings.KeyFieldName = "Id";
+
+        settings.SettingsPager.Visible = true;
+        settings.Settings.ShowGroupPanel = true;
+        settings.Settings.ShowFilterRow = true;
+        settings.Settings.ShowHeaderFilterButton = true;
+        settings.SettingsBehavior.AllowSelectByRowClick = true;
+
+        settings.Columns.Add("Id");
+        settings.Columns.Add("ProductName");
+        settings.Columns.Add(col => {
+            col.FieldName = "ProductionDate";
+            col.ColumnType = MVCxGridViewColumnType.DateEdit;
+            col.SettingsHeaderFilter.Mode = GridHeaderFilterMode.DateRangePicker;
+        });
+        settings.Columns.Add(col => {
+            col.FieldName = "ProductPrice";
+            col.ColumnType = MVCxGridViewColumnType.SpinEdit;
+            col.PropertiesEdit.DisplayFormatString = "c";
+        });
+        settings.Columns.Add("UnitsInStock");
+        settings.Columns.Add(col => {
+            col.FieldName = "ProductExpiresDate";
+            col.ColumnType = MVCxGridViewColumnType.DateEdit;
+            col.SettingsHeaderFilter.Mode = GridHeaderFilterMode.DateRangePicker;
+        });
+
+        settings.Columns.Add("DaysUntilExpires");
+
+        settings.Columns.Add(col => {
+            col.FieldName = "ProductStockSumProce";
+            col.UnboundType = DevExpress.Data.UnboundColumnType.Decimal;
+            col.PropertiesEdit.DisplayFormatString = "c";
+            col.UnboundExpression = "[ProductPrice] * [UnitsInStock]";
+        });
+
+        settings.FormatConditions.AddColorScale(condition => {
+            condition.FieldName = "DaysUntilExpires";
+            condition.Format = GridConditionColorScaleFormat.GreenYellowRed;
+            condition.MinimumValue = 0;
+            condition.MaximumValue = 30;
+        });
+    });
+}
+@grid.BindToEF("", "", (s, e) => {
+    CalculatedFieldsTestEntities db = new CalculatedFieldsTestEntities();
+    e.QueryableSource = db.CustomProducts(15, new DateTime(2018, 5, 15));
+    e.KeyExpression = "Id";
+}).GetHtml()
