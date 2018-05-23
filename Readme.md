@@ -17,5 +17,5 @@
 });</pre>
 
 <br/>
-
+A backup file of the sample database can be found in the App_Data directory.
 
